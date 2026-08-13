@@ -10,7 +10,11 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
+        "https://trace-proof-xi.vercel.app",
     ],
+    allow_origin_regex=(
+        r"^https://trace-proof(?:-[a-z0-9-]+)?\.vercel\.app$"
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -381,8 +385,7 @@ def build_debug_replay(commits):
 
         if (
             classification["stage"] == "Fix"
-            and classification["signal"]
-            == "Explicit"
+            and classification["signal"] == "Explicit"
         ):
             explicit_fix_detected = True
 
@@ -442,8 +445,7 @@ def build_debug_replay(commits):
 
     return {
         "event_count": len(events),
-        "explicit_fix_detected":
-            explicit_fix_detected,
+        "explicit_fix_detected": explicit_fix_detected,
         "stages_detected": stage_names,
         "summary": summary,
         "events": events,
@@ -459,22 +461,19 @@ def calculate_proof_score(
     verified_count = len([
         skill
         for skill in skills
-        if skill.get("confidence")
-        == "Verified"
+        if skill.get("confidence") == "Verified"
     ])
 
     supported_count = len([
         skill
         for skill in skills
-        if skill.get("confidence")
-        == "Supported"
+        if skill.get("confidence") == "Supported"
     ])
 
     inferred_count = len([
         skill
         for skill in skills
-        if skill.get("confidence")
-        == "Inferred"
+        if skill.get("confidence") == "Inferred"
     ])
 
     verified_score = min(
@@ -576,8 +575,7 @@ def calculate_proof_score(
             "repository_depth": {
                 "score": file_score,
                 "max": 10,
-                "files_scanned":
-                    files_scanned,
+                "files_scanned": files_scanned,
             },
 
             "development_stages": {
@@ -589,26 +587,19 @@ def calculate_proof_score(
             "explicit_fix_evidence": {
                 "score": fix_score,
                 "max": 10,
-                "detected":
-                    debug_replay.get(
-                        "explicit_fix_detected"
-                    ),
+                "detected": debug_replay.get(
+                    "explicit_fix_detected"
+                ),
             },
         },
 
         "evidence_summary": {
-            "verified_skills":
-                verified_count,
-            "supported_skills":
-                supported_count,
-            "inferred_skills":
-                inferred_count,
-            "commits_analyzed":
-                len(commits),
-            "files_scanned":
-                files_scanned,
-            "stages_detected":
-                stage_count,
+            "verified_skills": verified_count,
+            "supported_skills": supported_count,
+            "inferred_skills": inferred_count,
+            "commits_analyzed": len(commits),
+            "files_scanned": files_scanned,
+            "stages_detected": stage_count,
         },
 
         "note": (
@@ -623,8 +614,7 @@ def calculate_proof_score(
 @app.get("/")
 def home():
     return {
-        "message":
-            "TraceProof API is running"
+        "message": "TraceProof API is running"
     }
 
 
@@ -677,10 +667,8 @@ async def analyze_repository(
     )
 
     headers = {
-        "Accept":
-            "application/vnd.github+json",
-        "User-Agent":
-            "TraceProof",
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "TraceProof",
     }
 
     async with httpx.AsyncClient(
@@ -742,8 +730,7 @@ async def analyze_repository(
                     [],
                 )
                 if (
-                    item.get("type")
-                    == "blob"
+                    item.get("type") == "blob"
                     and item.get("path")
                 )
             ]
