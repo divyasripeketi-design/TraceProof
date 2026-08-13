@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 type ChangedFile = {
   filename: string | null;
   status: string | null;
@@ -131,7 +134,7 @@ export default function Home() {
     setRepoData(null);
 
     try {
-      const response = await fetch("http://localhost:8000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -351,7 +354,6 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Main progress */}
                 <div className="mt-7 h-3 overflow-hidden rounded-full bg-white/5">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-blue-400"
@@ -565,8 +567,7 @@ export default function Home() {
                             </span>
 
                             {index <
-                              repoData.debug_replay
-                                .stages_detected.length -
+                              repoData.debug_replay.stages_detected.length -
                                 1 && (
                               <span className="text-zinc-700">
                                 →
@@ -933,6 +934,7 @@ export default function Home() {
           )}
         </section>
 
+        {/* Roadmap */}
         <section
           id="features"
           className="mx-auto max-w-7xl border-t border-white/5 px-6 py-24"
