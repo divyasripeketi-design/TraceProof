@@ -1,7 +1,10 @@
+import os
+
+import httpx
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import httpx
+
 
 app = FastAPI(title="TraceProof API")
 
@@ -62,11 +65,35 @@ def detect_skills(file_paths, primary_language):
         if path.endswith(".html")
     ]
 
-    add_skill("TypeScript", typescript_files, "Verified")
-    add_skill("JavaScript", javascript_files, "Verified")
-    add_skill("Python", python_files, "Verified")
-    add_skill("CSS", css_files, "Verified")
-    add_skill("HTML", html_files, "Verified")
+    add_skill(
+        "TypeScript",
+        typescript_files,
+        "Verified",
+    )
+
+    add_skill(
+        "JavaScript",
+        javascript_files,
+        "Verified",
+    )
+
+    add_skill(
+        "Python",
+        python_files,
+        "Verified",
+    )
+
+    add_skill(
+        "CSS",
+        css_files,
+        "Verified",
+    )
+
+    add_skill(
+        "HTML",
+        html_files,
+        "Verified",
+    )
 
     nextjs_evidence = [
         path for path in file_paths
@@ -77,14 +104,22 @@ def detect_skills(file_paths, primary_language):
         )
     ]
 
-    add_skill("Next.js", nextjs_evidence, "Supported")
+    add_skill(
+        "Next.js",
+        nextjs_evidence,
+        "Supported",
+    )
 
     react_evidence = [
         path for path in file_paths
         if path.endswith((".tsx", ".jsx"))
     ]
 
-    add_skill("React", react_evidence, "Supported")
+    add_skill(
+        "React",
+        react_evidence,
+        "Supported",
+    )
 
     fastapi_evidence = [
         path for path in file_paths
@@ -97,14 +132,22 @@ def detect_skills(file_paths, primary_language):
         )
     ]
 
-    add_skill("FastAPI", fastapi_evidence, "Inferred")
+    add_skill(
+        "FastAPI",
+        fastapi_evidence,
+        "Inferred",
+    )
 
     git_evidence = [
         path for path in file_paths
         if path.endswith(".gitignore")
     ]
 
-    add_skill("Git", git_evidence, "Supported")
+    add_skill(
+        "Git",
+        git_evidence,
+        "Supported",
+    )
 
     tailwind_evidence = [
         path for path in file_paths
@@ -114,7 +157,11 @@ def detect_skills(file_paths, primary_language):
         )
     ]
 
-    add_skill("Tailwind CSS", tailwind_evidence, "Supported")
+    add_skill(
+        "Tailwind CSS",
+        tailwind_evidence,
+        "Supported",
+    )
 
     if primary_language:
         existing_names = {
@@ -127,17 +174,24 @@ def detect_skills(file_paths, primary_language):
                 "name": primary_language,
                 "confidence": "Supported",
                 "evidence_count": 1,
-                "evidence": ["GitHub primary language"],
+                "evidence": [
+                    "GitHub primary language"
+                ],
             })
 
     return skills
 
 
 def classify_commit(message, files):
-    message_lower = (message or "").lower()
+    message_lower = (
+        message or ""
+    ).lower()
 
     filenames = [
-        (file.get("filename") or "").lower()
+        (
+            file.get("filename")
+            or ""
+        ).lower()
         for file in files
     ]
 
@@ -195,7 +249,10 @@ def classify_commit(message, files):
         "introduce",
     ]
 
-    if any(keyword in message_lower for keyword in fix_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in fix_keywords
+    ):
         return {
             "stage": "Fix",
             "signal": "Explicit",
@@ -205,7 +262,10 @@ def classify_commit(message, files):
             ),
         }
 
-    if any(keyword in message_lower for keyword in refactor_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in refactor_keywords
+    ):
         return {
             "stage": "Refactor",
             "signal": "Explicit",
@@ -215,7 +275,10 @@ def classify_commit(message, files):
             ),
         }
 
-    if any(keyword in message_lower for keyword in test_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in test_keywords
+    ):
         return {
             "stage": "Testing",
             "signal": "Explicit",
@@ -225,11 +288,17 @@ def classify_commit(message, files):
             ),
         }
 
-    if any(keyword in message_lower for keyword in documentation_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in documentation_keywords
+    ):
         return {
             "stage": "Documentation",
             "signal": "Explicit",
-            "reason": "Commit message indicates documentation work.",
+            "reason": (
+                "Commit message indicates "
+                "documentation work."
+            ),
         }
 
     if (
@@ -246,10 +315,16 @@ def classify_commit(message, files):
         return {
             "stage": "Documentation",
             "signal": "Supported",
-            "reason": "Changed files are documentation-focused.",
+            "reason": (
+                "Changed files are "
+                "documentation-focused."
+            ),
         }
 
-    if any(keyword in message_lower for keyword in setup_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in setup_keywords
+    ):
         return {
             "stage": "Setup",
             "signal": "Explicit",
@@ -259,7 +334,10 @@ def classify_commit(message, files):
             ),
         }
 
-    if any(keyword in message_lower for keyword in feature_keywords):
+    if any(
+        keyword in message_lower
+        for keyword in feature_keywords
+    ):
         return {
             "stage": "Feature",
             "signal": "Supported",
@@ -272,7 +350,10 @@ def classify_commit(message, files):
     return {
         "stage": "Development",
         "signal": "Inferred",
-        "reason": "No stronger development-stage signal was found.",
+        "reason": (
+            "No stronger development-stage "
+            "signal was found."
+        ),
     }
 
 
@@ -280,11 +361,23 @@ def build_debug_replay(commits):
     events = []
     explicit_fix_detected = False
 
-    chronological_commits = list(reversed(commits))
+    chronological_commits = list(
+        reversed(commits)
+    )
 
-    for index, commit in enumerate(chronological_commits, start=1):
-        evidence = commit.get("evidence", {})
-        files = evidence.get("files", [])
+    for index, commit in enumerate(
+        chronological_commits,
+        start=1,
+    ):
+        evidence = commit.get(
+            "evidence",
+            {},
+        )
+
+        files = evidence.get(
+            "files",
+            [],
+        )
 
         classification = classify_commit(
             commit.get("message"),
@@ -293,7 +386,8 @@ def build_debug_replay(commits):
 
         if (
             classification["stage"] == "Fix"
-            and classification["signal"] == "Explicit"
+            and classification["signal"]
+            == "Explicit"
         ):
             explicit_fix_detected = True
 
@@ -302,13 +396,24 @@ def build_debug_replay(commits):
             "sha": commit.get("sha"),
             "message": commit.get("message"),
             "date": commit.get("date"),
-            "github_url": commit.get("github_url"),
+            "github_url": commit.get(
+                "github_url"
+            ),
             "stage": classification["stage"],
             "signal": classification["signal"],
             "reason": classification["reason"],
-            "files_changed": evidence.get("files_changed", 0),
-            "additions": evidence.get("additions", 0),
-            "deletions": evidence.get("deletions", 0),
+            "files_changed": evidence.get(
+                "files_changed",
+                0,
+            ),
+            "additions": evidence.get(
+                "additions",
+                0,
+            ),
+            "deletions": evidence.get(
+                "deletions",
+                0,
+            ),
             "files": [
                 file.get("filename")
                 for file in files
@@ -342,7 +447,8 @@ def build_debug_replay(commits):
 
     return {
         "event_count": len(events),
-        "explicit_fix_detected": explicit_fix_detected,
+        "explicit_fix_detected":
+            explicit_fix_detected,
         "stages_detected": stage_names,
         "summary": summary,
         "events": events,
@@ -358,39 +464,67 @@ def calculate_proof_score(
     verified_count = len([
         skill
         for skill in skills
-        if skill.get("confidence") == "Verified"
+        if skill.get("confidence")
+        == "Verified"
     ])
 
     supported_count = len([
         skill
         for skill in skills
-        if skill.get("confidence") == "Supported"
+        if skill.get("confidence")
+        == "Supported"
     ])
 
     inferred_count = len([
         skill
         for skill in skills
-        if skill.get("confidence") == "Inferred"
+        if skill.get("confidence")
+        == "Inferred"
     ])
 
-    verified_score = min(verified_count * 6, 30)
-    supported_score = min(supported_count * 4, 20)
-    commit_score = min(len(commits) * 4, 20)
+    verified_score = min(
+        verified_count * 6,
+        30,
+    )
+
+    supported_score = min(
+        supported_count * 4,
+        20,
+    )
+
+    commit_score = min(
+        len(commits) * 4,
+        20,
+    )
 
     file_score = min(
-        round((files_scanned / 50) * 10),
+        round(
+            (
+                files_scanned
+                / 50
+            )
+            * 10
+        ),
         10,
     )
 
     stage_count = len(
-        debug_replay.get("stages_detected", [])
+        debug_replay.get(
+            "stages_detected",
+            [],
+        )
     )
 
-    stage_score = min(stage_count * 2, 10)
+    stage_score = min(
+        stage_count * 2,
+        10,
+    )
 
     fix_score = (
         10
-        if debug_replay.get("explicit_fix_detected")
+        if debug_replay.get(
+            "explicit_fix_detected"
+        )
         else 0
     )
 
@@ -403,14 +537,20 @@ def calculate_proof_score(
         + fix_score
     )
 
-    total_score = min(total_score, 100)
+    total_score = min(
+        total_score,
+        100,
+    )
 
     if total_score >= 80:
         level = "Strong Evidence"
+
     elif total_score >= 60:
         level = "Good Evidence"
+
     elif total_score >= 40:
         level = "Developing Evidence"
+
     else:
         level = "Limited Evidence"
 
@@ -418,48 +558,64 @@ def calculate_proof_score(
         "score": total_score,
         "max_score": 100,
         "level": level,
+
         "breakdown": {
             "verified_skills": {
                 "score": verified_score,
                 "max": 30,
                 "count": verified_count,
             },
+
             "supported_skills": {
                 "score": supported_score,
                 "max": 20,
                 "count": supported_count,
             },
+
             "commit_evidence": {
                 "score": commit_score,
                 "max": 20,
                 "count": len(commits),
             },
+
             "repository_depth": {
                 "score": file_score,
                 "max": 10,
-                "files_scanned": files_scanned,
+                "files_scanned":
+                    files_scanned,
             },
+
             "development_stages": {
                 "score": stage_score,
                 "max": 10,
                 "count": stage_count,
             },
+
             "explicit_fix_evidence": {
                 "score": fix_score,
                 "max": 10,
-                "detected": debug_replay.get(
-                    "explicit_fix_detected"
-                ),
+                "detected":
+                    debug_replay.get(
+                        "explicit_fix_detected"
+                    ),
             },
         },
+
         "evidence_summary": {
-            "verified_skills": verified_count,
-            "supported_skills": supported_count,
-            "inferred_skills": inferred_count,
-            "commits_analyzed": len(commits),
-            "files_scanned": files_scanned,
-            "stages_detected": stage_count,
+            "verified_skills":
+                verified_count,
+            "supported_skills":
+                supported_count,
+            "inferred_skills":
+                inferred_count,
+            "commits_analyzed":
+                len(commits),
+            "files_scanned":
+                files_scanned,
+            "stages_detected":
+                stage_count,
         },
+
         "note": (
             "The Proof Score is calculated only from "
             "repository evidence loaded by TraceProof. "
@@ -469,10 +625,33 @@ def calculate_proof_score(
     }
 
 
+def github_headers():
+    headers = {
+        "Accept":
+            "application/vnd.github+json",
+        "User-Agent":
+            "TraceProof",
+        "X-GitHub-Api-Version":
+            "2022-11-28",
+    }
+
+    github_token = os.getenv(
+        "GITHUB_TOKEN"
+    )
+
+    if github_token:
+        headers["Authorization"] = (
+            f"Bearer {github_token}"
+        )
+
+    return headers
+
+
 @app.get("/")
 def home():
     return {
-        "message": "TraceProof API is running"
+        "message":
+            "TraceProof API is running"
     }
 
 
@@ -485,8 +664,14 @@ def health():
 
 
 @app.post("/analyze")
-async def analyze_repository(request: RepoRequest):
-    repo_url = request.repo_url.strip().rstrip("/")
+async def analyze_repository(
+    request: RepoRequest
+):
+    repo_url = (
+        request.repo_url
+        .strip()
+        .rstrip("/")
+    )
 
     if repo_url.endswith(".git"):
         repo_url = repo_url[:-4]
@@ -499,7 +684,10 @@ async def analyze_repository(request: RepoRequest):
     ):
         raise HTTPException(
             status_code=400,
-            detail="Please enter a valid GitHub repository URL.",
+            detail=(
+                "Please enter a valid "
+                "GitHub repository URL."
+            ),
         )
 
     owner = parts[-2]
@@ -515,23 +703,24 @@ async def analyze_repository(request: RepoRequest):
         f"{owner}/{repo}/commits"
     )
 
-    headers = {
-        "Accept": "application/vnd.github+json",
-        "User-Agent": "TraceProof",
-    }
+    headers = github_headers()
 
-    async with httpx.AsyncClient(timeout=20.0) as client:
+    async with httpx.AsyncClient(
+        timeout=20.0
+    ) as client:
+
         try:
             repo_response = await client.get(
                 repo_api_url,
                 headers=headers,
             )
+
         except httpx.RequestError as exc:
             raise HTTPException(
                 status_code=502,
                 detail=(
-                    "Could not connect to GitHub API: "
-                    f"{str(exc)}"
+                    "Could not connect to "
+                    "GitHub API."
                 ),
             ) from exc
 
@@ -543,16 +732,25 @@ async def analyze_repository(request: RepoRequest):
 
         if repo_response.status_code != 200:
             try:
-                github_error = repo_response.json().get(
-                    "message",
-                    "Unknown GitHub API error",
+                github_error = (
+                    repo_response
+                    .json()
+                    .get(
+                        "message",
+                        "Unknown GitHub API error",
+                    )
                 )
-            except Exception:
-                github_error = repo_response.text
 
-            rate_remaining = repo_response.headers.get(
-                "x-ratelimit-remaining",
-                "unknown",
+            except Exception:
+                github_error = (
+                    repo_response.text
+                )
+
+            rate_remaining = (
+                repo_response.headers.get(
+                    "x-ratelimit-remaining",
+                    "unknown",
+                )
             )
 
             raise HTTPException(
@@ -583,8 +781,11 @@ async def analyze_repository(request: RepoRequest):
             tree_response = await client.get(
                 tree_api_url,
                 headers=headers,
-                params={"recursive": "1"},
+                params={
+                    "recursive": "1"
+                },
             )
+
         except httpx.RequestError:
             tree_response = None
 
@@ -592,15 +793,22 @@ async def analyze_repository(request: RepoRequest):
 
         if (
             tree_response is not None
-            and tree_response.status_code == 200
+            and tree_response.status_code
+            == 200
         ):
-            tree_data = tree_response.json()
+            tree_data = (
+                tree_response.json()
+            )
 
             file_paths = [
                 item.get("path")
-                for item in tree_data.get("tree", [])
+                for item in tree_data.get(
+                    "tree",
+                    [],
+                )
                 if (
-                    item.get("type") == "blob"
+                    item.get("type")
+                    == "blob"
                     and item.get("path")
                 )
             ]
@@ -609,8 +817,11 @@ async def analyze_repository(request: RepoRequest):
             commits_response = await client.get(
                 commits_api_url,
                 headers=headers,
-                params={"per_page": 5},
+                params={
+                    "per_page": 5
+                },
             )
+
         except httpx.RequestError:
             commits_response = None
 
@@ -618,28 +829,42 @@ async def analyze_repository(request: RepoRequest):
 
         if (
             commits_response is not None
-            and commits_response.status_code == 200
+            and commits_response.status_code
+            == 200
         ):
-            commit_list = commits_response.json()
+            commit_list = (
+                commits_response.json()
+            )
 
             for item in commit_list:
                 sha = item.get("sha")
 
                 detail_url = (
                     f"https://api.github.com/repos/"
-                    f"{owner}/{repo}/commits/{sha}"
+                    f"{owner}/{repo}/commits/"
+                    f"{sha}"
                 )
 
                 try:
-                    detail_response = await client.get(
-                        detail_url,
-                        headers=headers,
+                    detail_response = (
+                        await client.get(
+                            detail_url,
+                            headers=headers,
+                        )
                     )
+
                 except httpx.RequestError:
                     detail_response = None
 
-                commit = item.get("commit", {})
-                author = commit.get("author") or {}
+                commit = item.get(
+                    "commit",
+                    {},
+                )
+
+                author = (
+                    commit.get("author")
+                    or {}
+                )
 
                 evidence = {
                     "files_changed": 0,
@@ -650,47 +875,97 @@ async def analyze_repository(request: RepoRequest):
 
                 if (
                     detail_response is not None
-                    and detail_response.status_code == 200
+                    and detail_response.status_code
+                    == 200
                 ):
-                    detail = detail_response.json()
-                    stats = detail.get("stats") or {}
-                    files = detail.get("files") or []
+                    detail = (
+                        detail_response.json()
+                    )
 
-                    evidence["files_changed"] = len(files)
+                    stats = (
+                        detail.get("stats")
+                        or {}
+                    )
 
-                    evidence["additions"] = stats.get(
+                    files = (
+                        detail.get("files")
+                        or []
+                    )
+
+                    evidence[
+                        "files_changed"
+                    ] = len(files)
+
+                    evidence[
+                        "additions"
+                    ] = stats.get(
                         "additions",
                         0,
                     )
 
-                    evidence["deletions"] = stats.get(
+                    evidence[
+                        "deletions"
+                    ] = stats.get(
                         "deletions",
                         0,
                     )
 
                     evidence["files"] = [
                         {
-                            "filename": file.get("filename"),
-                            "status": file.get("status"),
-                            "additions": file.get(
-                                "additions",
-                                0,
-                            ),
-                            "deletions": file.get(
-                                "deletions",
-                                0,
-                            ),
+                            "filename":
+                                file.get(
+                                    "filename"
+                                ),
+
+                            "status":
+                                file.get(
+                                    "status"
+                                ),
+
+                            "additions":
+                                file.get(
+                                    "additions",
+                                    0,
+                                ),
+
+                            "deletions":
+                                file.get(
+                                    "deletions",
+                                    0,
+                                ),
                         }
+
                         for file in files
                     ]
 
                 commits.append({
-                    "sha": sha[:7] if sha else "",
-                    "message": commit.get("message"),
-                    "author": author.get("name"),
-                    "date": author.get("date"),
-                    "github_url": item.get("html_url"),
-                    "evidence": evidence,
+                    "sha":
+                        sha[:7]
+                        if sha
+                        else "",
+
+                    "message":
+                        commit.get(
+                            "message"
+                        ),
+
+                    "author":
+                        author.get(
+                            "name"
+                        ),
+
+                    "date":
+                        author.get(
+                            "date"
+                        ),
+
+                    "github_url":
+                        item.get(
+                            "html_url"
+                        ),
+
+                    "evidence":
+                        evidence,
                 })
 
     skills = detect_skills(
@@ -698,7 +973,9 @@ async def analyze_repository(request: RepoRequest):
         repo_data.get("language"),
     )
 
-    debug_replay = build_debug_replay(commits)
+    debug_replay = build_debug_replay(
+        commits
+    )
 
     proof_score = calculate_proof_score(
         skills=skills,
@@ -708,46 +985,78 @@ async def analyze_repository(request: RepoRequest):
     )
 
     return {
-        "name": repo_data.get("name"),
+        "name":
+            repo_data.get("name"),
 
-        "owner": repo_data.get(
-            "owner",
-            {},
-        ).get("login"),
+        "owner":
+            repo_data.get(
+                "owner",
+                {},
+            ).get("login"),
 
-        "description": repo_data.get("description"),
+        "description":
+            repo_data.get(
+                "description"
+            ),
 
-        "language": repo_data.get("language"),
+        "language":
+            repo_data.get(
+                "language"
+            ),
 
-        "stars": repo_data.get("stargazers_count"),
+        "stars":
+            repo_data.get(
+                "stargazers_count"
+            ),
 
-        "forks": repo_data.get("forks_count"),
+        "forks":
+            repo_data.get(
+                "forks_count"
+            ),
 
-        "open_issues": repo_data.get(
-            "open_issues_count"
-        ),
+        "open_issues":
+            repo_data.get(
+                "open_issues_count"
+            ),
 
-        "default_branch": repo_data.get(
-            "default_branch"
-        ),
+        "default_branch":
+            repo_data.get(
+                "default_branch"
+            ),
 
-        "created_at": repo_data.get("created_at"),
+        "created_at":
+            repo_data.get(
+                "created_at"
+            ),
 
-        "updated_at": repo_data.get("updated_at"),
+        "updated_at":
+            repo_data.get(
+                "updated_at"
+            ),
 
-        "github_url": repo_data.get("html_url"),
+        "github_url":
+            repo_data.get(
+                "html_url"
+            ),
 
-        "files_scanned": len(file_paths),
+        "files_scanned":
+            len(file_paths),
 
-        "skill_count": len(skills),
+        "skill_count":
+            len(skills),
 
-        "skills": skills,
+        "skills":
+            skills,
 
-        "commit_count_loaded": len(commits),
+        "commit_count_loaded":
+            len(commits),
 
-        "commits": commits,
+        "commits":
+            commits,
 
-        "debug_replay": debug_replay,
+        "debug_replay":
+            debug_replay,
 
-        "proof_score": proof_score,
+        "proof_score":
+            proof_score,
     }
